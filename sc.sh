@@ -1,16 +1,20 @@
+LAN="192.168.1."
 log="ip.log"
-for ip in "10.7.180."{142..144}
+
+for i in {117..118}
 do
 
-ping -c 1 $ip >> /dev/null
-[ $? = 0 ] && out+=("$ip+") || out+=("$ip-")
+old[$i]=${out[$i]}
+ping -c 1 ${LAN}${i} >> /dev/null
+out[$i]=$?
+[ ${old[$i]} = ${out[$i]} ] && unset old[$i]
 done
 
-if [ -f $log ]
+if [ ${#old[@]} -gt 0 ]
 then
- mv $log "${log}.old"
- echo ${out[@]} > $log
- diff $log "${log}.old"
-else
- echo ${out[@]} > $log
+ for i in ${!old[@]} ; do
+  echo "${LAN}${i} ${old[$i]} -> ${out[$i]}"
+ done
 fi
+
+echo ${out[@]} > $log
